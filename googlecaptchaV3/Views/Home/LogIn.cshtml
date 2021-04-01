@@ -1,0 +1,64 @@
+﻿@using GoogleCaptchaV3.Models
+@using System.Configuration
+@model LogInViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2>Google Captcha V3 Demo</h2>
+
+        <div class="well">
+            @using (Html.BeginForm("", "", FormMethod.Post, new { }))
+            {
+                @Html.HiddenFor(model => model.CaptchaToken)
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Email)
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { style = "color:red;" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Password)
+                    @Html.TextBoxFor(model => model.Password, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Password, "", new { style = "color:red;" })
+                </div>
+
+                <button type="submit" class="btn btn-primary btnSubmit" onclick="ValidateCaptcha(event)">Click Here to validate the Captcha</button>
+            }
+        </div>
+        
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <script src="https://www.google.com/recaptcha/api.js?render=@ConfigurationManager.AppSettings["GoogleCaptchaSiteKey"]"></script>
+
+    <script type="text/javascript">
+        var reCAPTCHA_site_key = "@ConfigurationManager.AppSettings["GoogleCaptchaSiteKey"]";
+        function ValidateCaptcha(e) {
+
+            var isValid = $("form").valid();
+
+            if (!isValid) return;
+
+            e.preventDefault();
+            grecaptcha.ready(function () {
+
+                grecaptcha.execute(reCAPTCHA_site_key, { action: 'LogInPage' }).then(function (token) {
+
+                    if (!token) return;
+
+                    $("#CaptchaToken").val(token);
+                    $("form").submit();
+                });
+            });
+        }
+    </script>
+}
